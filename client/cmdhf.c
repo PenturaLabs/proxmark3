@@ -22,6 +22,7 @@
 #include "cmdhflegic.h"
 #include "cmdhficlass.h"
 #include "cmdhfmf.h"
+#include "cmdhfmfu.h"
 
 static int CmdHelp(const char *Cmd);
 
@@ -34,15 +35,16 @@ int CmdHFTune(const char *Cmd)
 
 static command_t CommandTable[] = 
 {
-  {"help",        CmdHelp,          1, "This help"},
-  {"14a",         CmdHF14A,         1, "{ ISO14443A RFIDs... }"},
-  {"14b",         CmdHF14B,         1, "{ ISO14443B RFIDs... }"},
-  {"15",          CmdHF15,          1, "{ ISO15693 RFIDs... }"},
-  {"epa",         CmdHFEPA,         1, "{ German Identification Card... }"},
-  {"legic",       CmdHFLegic,       0, "{ LEGIC RFIDs... }"},
-  {"iclass",      CmdHFiClass,      1, "{ ICLASS RFIDs... }"},
-  {"mf",      		CmdHFMF,		      1, "{ MIFARE RFIDs... }"},
-  {"tune",        CmdHFTune,        0, "Continuously measure HF antenna tuning"},
+  {"help",	CmdHelp,        1, "This help"},
+  {"14a",	CmdHF14A,       1, "{ ISO14443A RFIDs... }"},
+  {"14b",	CmdHF14B,       1, "{ ISO14443B RFIDs... }"},
+  {"15",	CmdHF15,        1, "{ ISO15693 RFIDs... }"},
+  {"epa",	CmdHFEPA,       1, "{ German Identification Card... }"},
+  {"legic",	CmdHFLegic,     0, "{ LEGIC RFIDs... }"},
+  {"iclass",	CmdHFiClass,    1, "{ ICLASS RFIDs... }"},
+  {"mf",	CmdHFMF,	1, "{ MIFARE RFIDs... }"},
+  {"mfu",	CmdHFMFUltra,	1, "{ MIFARE Ultralight RFIDs... }"},
+  {"tune",	CmdHFTune,      0, "Continuously measure HF antenna tuning"},
   {NULL, NULL, 0, NULL}
 };
 

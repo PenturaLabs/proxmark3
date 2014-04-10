@@ -636,17 +636,17 @@ void UsbPacketReceived(uint8_t *packet, int len)
 		case CMD_HID_DEMOD_FSK:
 			CmdHIDdemodFSK(0, 0, 0, 1);					// Demodulate HID tag
 			break;
-		case CMD_HID_SIM_TAG:
-			CmdHIDsimTAG(c->arg[0], c->arg[1], 1);					// Simulate HID tag by ID
-			break;
-		case CMD_HID_CLONE_TAG: // Clone HID tag by ID to T55x7
-			CopyHIDtoT55x7(c->arg[0], c->arg[1], c->arg[2], c->d.asBytes[0]);
-			break;
 		case CMD_IO_DEMOD_FSK:
 			CmdIOdemodFSK(1, 0, 0, 1);					// Demodulate IO tag
 			break;
 		case CMD_IO_CLONE_TAG: // Clone IO tag by ID to T55x7
 			CopyIOtoT55x7(c->arg[0], c->arg[1], c->d.asBytes[0]);
+			break;
+		case CMD_HID_SIM_TAG:
+			CmdHIDsimTAG(c->arg[0], c->arg[1], 1);				// Simulate HID tag by ID
+			break;
+		case CMD_HID_CLONE_TAG: // Clone HID tag by ID to T55x7
+			CopyHIDtoT55x7(c->arg[0], c->arg[1], c->arg[2], c->d.asBytes[0]);
 			break;
 		case CMD_EM410X_WRITE_TAG:
 			WriteEM410x(c->arg[0], c->arg[1], c->arg[2]);
@@ -790,6 +790,12 @@ void UsbPacketReceived(uint8_t *packet, int len)
 			break;
 		case CMD_MIFAREU_READBL:
 			MifareUReadBlock(c->arg[0],c->d.asBytes);
+			break;
+		case CMD_MIFAREUC_AUTH1:
+			MifareUC_Auth1(c->arg[0],c->d.asBytes);
+			break;
+		case CMD_MIFAREUC_AUTH2:
+			MifareUC_Auth2(c->arg[0],c->d.asBytes);
 			break;
 		case CMD_MIFAREU_READCARD:
 			MifareUReadCard(c->arg[0],c->d.asBytes);

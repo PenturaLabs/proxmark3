@@ -2,6 +2,8 @@
 // Merlok - June 2011, 2012
 // Gerhard de Koning Gans - May 2008
 // Hagen Fritsch - June 2010
+// Midnitesnake - Dec 2013
+// Andy Davies  - Apr 2014
 //
 // This code is licensed to you under the terms of the GNU GPL, version 2 or,
 // at your option, any later version. See the LICENSE.txt file for the text of
@@ -77,28 +79,21 @@ void MifareReadBlock(uint8_t arg0, uint8_t arg1, uint8_t arg2, uint8_t *datain)
 	// add trace trailer
 	memset(uid, 0x44, 4);
 	LogTrace(uid, 4, 0, 0, TRUE);
-
-//	UsbCommand ack = {CMD_ACK, {isOK, 0, 0}};
-//	memcpy(ack.d.asBytes, dataoutbuf, 16);
 	
 	LED_B_ON();
-  cmd_send(CMD_ACK,isOK,0,0,dataoutbuf,16);
-//	UsbSendPacket((uint8_t *)&ack, sizeof(UsbCommand));
+	cmd_send(CMD_ACK,isOK,0,0,dataoutbuf,16);
 	LED_B_OFF();
 
 
-  // Thats it...
+	// Thats it...
 	FpgaWriteConfWord(FPGA_MAJOR_MODE_OFF);
 	LEDsoff();
-//  iso14a_set_tracing(TRUE);
+	//iso14a_set_tracing(TRUE);
 
 }
 
-void MifareUReadBlock(uint8_t arg0,uint8_t *datain)
-{
-    // params
-	uint8_t blockNo = arg0;
-	
+
+void MifareUC_Auth1(uint8_t arg0, uint8_t *datain){
 	// variables
 	byte_t isOK = 0;
 	byte_t dataoutbuf[16];
@@ -112,25 +107,101 @@ void MifareUReadBlock(uint8_t arg0,uint8_t *datain)
 	LED_A_ON();
 	LED_B_OFF();
 	LED_C_OFF();
+	
+
+	if(!iso14443a_select_card(uid, NULL, &cuid)) {
+          if (MF_DBGLEVEL >= 1)	Dbprintf("Can't select card, something went wrong before auth");
+	};
+
+	if(mifare_ultra_auth1(cuid, dataoutbuf)){
+	  if (MF_DBGLEVEL >= 1)	Dbprintf("Authentication part1: Fail.");    
+	}
+
+	isOK=1;
+	if (MF_DBGLEVEL >= 2)	DbpString("AUTH 1 FINISHED");
+    
+	LED_B_ON();
+        cmd_send(CMD_ACK,isOK,cuid,0,dataoutbuf,11);
+	LED_B_OFF();
+	  
+	// Thats it...
+	//FpgaWriteConfWord(FPGA_MAJOR_MODE_OFF);
+	LEDsoff();
+}
+void MifareUC_Auth2(uint32_t arg0, uint8_t *datain){
+	// params
+	uint32_t cuid = arg0;
+	uint8_t key[16]={0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00};
+	// variables
+	byte_t isOK = 0;
+	byte_t dataoutbuf[16];
+    
+	memcpy(key, datain, 16);
+	// clear trace
+	//iso14a_clear_trace();
+	//iso14443a_setup(FPGA_HF_ISO14443A_READER_LISTEN);
+    
+	LED_A_ON();
+	LED_B_OFF();
+	LED_C_OFF();
+
+//	Dbprintf("Sending %02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x",
+//		 key[0],key[1],key[2],key[3],key[4],key[5],key[6],key[7],key[8],
+//		 key[9],key[10],key[11],key[12],key[13],key[14],key[15]);
+	
+	if(mifare_ultra_auth2(cuid, key, dataoutbuf)){
+	    if (MF_DBGLEVEL >= 1) Dbprintf("Authentication part2: Fail...");    
+	}
+	isOK=1;
+	if (MF_DBGLEVEL >= 2)	DbpString("AUTH 2 FINISHED");
+    
+	LED_B_ON();
+        cmd_send(CMD_ACK,isOK,0,0,dataoutbuf,11);
+	LED_B_OFF();
+    
+    // Thats it...
+	FpgaWriteConfWord(FPGA_MAJOR_MODE_OFF);
+	LEDsoff();
+}
+
+void MifareUReadBlock(uint8_t arg0, uint8_t *datain )
+{
+    // params
+	uint8_t blockNo = arg0;
+	//uint8_t key[16]={0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00};
+	// variables
+	byte_t isOK = 0;
+	byte_t dataoutbuf[16];
+	uint8_t uid[10];
+	uint32_t cuid;
+    
+	//memcpy(key, datain + 10, 26);
+	
+	// clear trace
+	iso14a_clear_trace();
+	iso14443a_setup(FPGA_HF_ISO14443A_READER_LISTEN);
+    
+	LED_A_ON();
+	LED_B_OFF();
+	LED_C_OFF();
     
 	while (true) {
-		if(!iso14443a_select_card(uid, NULL, &cuid)) {
+	  if(!iso14443a_select_card(uid, NULL, &cuid)) {
             if (MF_DBGLEVEL >= 1)	Dbprintf("Can't select card");
 			break;
-		};
-        
-		if(mifare_ultra_readblock(cuid, blockNo, dataoutbuf)) {
+	  };
+
+	  if(mifare_ultra_readblock(cuid, blockNo, dataoutbuf)) {
             if (MF_DBGLEVEL >= 1)	Dbprintf("Read block error");
 			break;
-		};
+	  };
         
-		if(mifare_ultra_halt(cuid)) {
+	  if(mifare_ultra_halt(cuid)) {
             if (MF_DBGLEVEL >= 1)	Dbprintf("Halt error");
 			break;
-		};
-		
-		isOK = 1;
-		break;
+	  };	
+	  isOK = 1;
+	  break;
 	}
 	
 	if (MF_DBGLEVEL >= 2)	DbpString("READ BLOCK FINISHED");
