@@ -798,8 +798,11 @@ void UsbPacketReceived(uint8_t *packet, int len)
 			MifareUC_Auth2(c->arg[0],c->d.asBytes);
 			break;
 		case CMD_MIFAREU_READCARD:
-			MifareUReadCard(c->arg[0],c->d.asBytes);
+			MifareUReadCard(c->arg[0],c->arg[1],c->d.asBytes);
                         break;
+		case CMD_MIFAREUC_READCARD:
+			MifareUReadCard(c->arg[0],c->arg[1],c->d.asBytes);
+                        break;			
 		case CMD_MIFARE_READSC:
 			MifareReadSector(c->arg[0], c->arg[1], c->arg[2], c->d.asBytes);
 			break;

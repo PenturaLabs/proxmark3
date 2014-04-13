@@ -13,7 +13,7 @@ CXX=g++
 VPATH = ../common
 OBJDIR = obj
 
-LDLIBS = -L/opt/local/lib -L/usr/local/lib -lreadline -lpthread -lssl ../liblua/liblua.a
+LDLIBS = -L/opt/local/lib -L/usr/local/lib -lreadline -lpthread -lcrypto ../liblua/liblua.a
 LDFLAGS = $(COMMON_FLAGS)
 CFLAGS = -std=c99 -I. -I../include -I../common -I/opt/local/include -I../liblua -Wall $(COMMON_FLAGS) -g -O4 
 LUAPLATFORM = generic

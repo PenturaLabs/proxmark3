@@ -316,14 +316,15 @@ void MifareReadSector(uint8_t arg0, uint8_t arg1, uint8_t arg2, uint8_t *datain)
 
 }
 
-void MifareUReadCard(uint8_t arg0, uint8_t *datain)
+void MifareUReadCard(uint8_t arg0, int arg1, uint8_t *datain)
 {
   // params
         uint8_t sectorNo = arg0;
-        
+        int Pages=arg1;
+	int count_Pages=0;
         // variables
         byte_t isOK = 0;
-        byte_t dataoutbuf[16 * 4];
+        byte_t dataoutbuf[44 * 4];
         uint8_t uid[10];
         uint32_t cuid;
 
@@ -336,17 +337,19 @@ void MifareUReadCard(uint8_t arg0, uint8_t *datain)
         LED_A_ON();
         LED_B_OFF();
         LED_C_OFF();
-
+        Dbprintf("Pages %d",Pages);
         while (true) {
                 if(!iso14443a_select_card(uid, NULL, &cuid)) {
                 if (MF_DBGLEVEL >= 1)   Dbprintf("Can't select card");
                         break;
                 };
-		for(int sec=0;sec<16;sec++){
+		for(int sec=0;sec<Pages;sec++){
                     if(mifare_ultra_readblock(cuid, sectorNo * 4 + sec, dataoutbuf + 4 * sec)) {
-                    if (MF_DBGLEVEL >= 1)   Dbprintf("Read block %d error",sec);
+                      if (MF_DBGLEVEL >= 1)   Dbprintf("Read block %d error",sec);
                         break;
-                    };
+                    }else{
+		      count_Pages++;
+		    };
                 }
                 if(mifare_ultra_halt(cuid)) {
                 if (MF_DBGLEVEL >= 1)   Dbprintf("Halt error");
@@ -356,16 +359,18 @@ void MifareUReadCard(uint8_t arg0, uint8_t *datain)
                 isOK = 1;
                 break;
         }
-        
+        Dbprintf("Pages read %d",count_Pages);
         if (MF_DBGLEVEL >= 2) DbpString("READ CARD FINISHED");
 
         // add trace trailer
-        memset(uid, 0x44, 4);
-        LogTrace(uid, 4, 0, 0, TRUE);
+        //memset(uid, 0x44, 4);
+        //LogTrace(uid, 4, 0, 0, TRUE);
         
         LED_B_ON();
-		cmd_send(CMD_ACK,isOK,0,0,dataoutbuf,64);
-  //cmd_send(CMD_ACK,isOK,0,0,dataoutbuf+32, 32);
+	if (Pages==16) cmd_send(CMD_ACK,isOK,0,0,dataoutbuf,64);
+	if (Pages==44 && count_Pages==16) cmd_send(CMD_ACK,isOK,0,0,dataoutbuf,64);
+	if (Pages==44 && count_Pages>16) cmd_send(CMD_ACK,isOK,0,0,dataoutbuf,176);
+        //cmd_send(CMD_ACK,isOK,0,0,dataoutbuf+32, 32);
         LED_B_OFF();
 
         // Thats it...

@@ -171,6 +171,7 @@ int CmdHF14AMfURdBl(const char *Cmd){
 int CmdHF14AMfURdCard(const char *Cmd){
     int i;
     uint8_t BlockNo = 0;
+    int Pages=16;
     uint8_t *lockbytes_t=NULL;
     uint8_t lockbytes[2]={0,0};
     bool bit[16]={0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
@@ -190,7 +191,7 @@ int CmdHF14AMfURdCard(const char *Cmd){
         PrintAndLog("Dumping Ultralight Card Data...");
     }
     PrintAndLog("Attempting to Read Ultralight... ");
-    UsbCommand c = {CMD_MIFAREU_READCARD, {BlockNo}};
+    UsbCommand c = {CMD_MIFAREU_READCARD, {BlockNo, Pages}};
     SendCommand(&c);
     UsbCommand resp;
 
@@ -199,7 +200,7 @@ int CmdHF14AMfURdCard(const char *Cmd){
         data  = resp.d.asBytes;
         PrintAndLog("isOk:%02x", isOK);
         if (isOK) 
-            for (i = 0; i < 16; i++) {
+            for (i = 0; i < Pages; i++) {
                 switch(i){
                     case 2:
                         //process lock bytes
@@ -295,6 +296,7 @@ int CmdHF14AMfURdCard(const char *Cmd){
 int CmdHF14AMfUDump(const char *Cmd){
     int i;
     uint8_t BlockNo = 0;
+    int Pages=16;
     uint8_t *lockbytes_t=NULL;
     uint8_t lockbytes[2]={0,0};
     bool bit[16]={0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
@@ -314,7 +316,7 @@ int CmdHF14AMfUDump(const char *Cmd){
     PrintAndLog("Dumping Ultralight Card Data...");
     //}	
     PrintAndLog("Attempting to Read Ultralight... ");
-    UsbCommand c = {CMD_MIFAREU_READCARD, {BlockNo}};
+    UsbCommand c = {CMD_MIFAREU_READCARD, {BlockNo,Pages}};
     SendCommand(&c);
     UsbCommand resp;
 
@@ -323,7 +325,7 @@ int CmdHF14AMfUDump(const char *Cmd){
         data  = resp.d.asBytes;
         PrintAndLog("isOk:%02x", isOK);
         if (isOK) 
-            for (i = 0; i < 16; i++) {
+            for (i = 0; i < Pages; i++) {
                 switch(i){
                     case 2:
                         //process lock bytes
@@ -569,6 +571,7 @@ int CmdHF14AMfUCRdBl(const char *Cmd)
 int CmdHF14AMfUCRdCard(const char *Cmd){
     int i;
     uint8_t BlockNo = 0;
+    int Pages=44;
     uint8_t *lockbytes_t=NULL;
     uint8_t lockbytes[2]={0,0};
     uint8_t *lockbytes_t2=NULL;
@@ -591,16 +594,17 @@ int CmdHF14AMfUCRdCard(const char *Cmd){
       PrintAndLog("Dumping Ultralight C Card Data...");
     }
     PrintAndLog("Attempting to Read Ultralight C... ");
-    UsbCommand c = {CMD_MIFAREU_READCARD, {BlockNo}};
+    UsbCommand c = {CMD_MIFAREUC_READCARD, {BlockNo, Pages}};
     SendCommand(&c);
     UsbCommand resp;
 
     if (WaitForResponseTimeout(CMD_ACK,&resp,1500)) {
         isOK  = resp.arg[0] & 0xff;
         data  = resp.d.asBytes;
+	//Pages=sizeof(data)/sizeof(data[0]);
         PrintAndLog("isOk:%02x", isOK);
         if (isOK) 
-            for (i = 0; i < 44; i++) {
+            for (i = 0; i < Pages; i++) {
                 switch(i){
                     case 2:
                         //process lock bytes
@@ -777,6 +781,7 @@ int CmdHF14AMfUCRdCard(const char *Cmd){
 int CmdHF14AMfUCDump(const char *Cmd){
     int i;
     uint8_t BlockNo = 0;
+    int Pages=44;
     uint8_t *lockbytes_t=NULL;
     uint8_t lockbytes[2]={0,0};
     uint8_t *lockbytes_t2=NULL;
@@ -799,7 +804,7 @@ int CmdHF14AMfUCDump(const char *Cmd){
       PrintAndLog("Dumping Ultralight C Card Data...");
     //}
     PrintAndLog("Attempting to Read Ultralight C... ");
-    UsbCommand c = {CMD_MIFAREU_READCARD, {BlockNo}};
+    UsbCommand c = {CMD_MIFAREU_READCARD, {BlockNo,Pages}};
     SendCommand(&c);
     UsbCommand resp;
 
@@ -808,7 +813,7 @@ int CmdHF14AMfUCDump(const char *Cmd){
         data  = resp.d.asBytes;
         PrintAndLog("isOk:%02x", isOK);
         if (isOK) 
-            for (i = 0; i < 44; i++) {
+            for (i = 0; i < Pages; i++) {
                 switch(i){
                     case 2:
                         //process lock bytes

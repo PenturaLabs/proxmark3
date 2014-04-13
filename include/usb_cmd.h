@@ -152,6 +152,7 @@ typedef struct {
 //ultralightC
 #define CMD_MIFAREUC_AUTH1						  0x0724
 #define CMD_MIFAREUC_AUTH2						  0x0725
+#define CMD_MIFAREUC_READCARD						  0x0726
 
 #define CMD_UNKNOWN                                                       0xFFFF
 
