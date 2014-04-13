@@ -1,161 +1,78 @@
-NOTICE:
-(2014-03-17)
-Moving the repository from google code to GitHub is up for discussion!
-Please check out the following thread and post your comments...
-http://www.proxmark.org/forum/viewtopic.php?id=1902
-Discussions will close on March 31st.
+OS Support
+Confirmed Functional on following OSs:
+* Gentoo Linux
+* Debian Linux
+* Ubuntu Linux
+* OSX
 
-INTRO:
+Known Problems / Linker Issues
+* Windows
+* Cygwin
+* Android
 
-This file contains enough software, logic (for the FPGA), and design
-documentation for the hardware that you could, at least in theory,
-do something useful with a proxmark3. It has commands to:
+Operation
+===============
 
-    * read any kind of 125 kHz unidirectional tag
-    * simulate any kind of 125 kHz unidirectional tag
+hf mfu urdbl   - Read Ultralight Block  
+hf mfu urdcard - Read Ultralight Card
+hf mfu udump - Dump Ultralight Card
+hf mfu uwrbl - Read Ultralight Block
 
-(This is enough to perform all of the silly cloning attacks, like the
-ones that I did at the Capitol in Sacramento, or anything involving
-a Verichip. From a technical standpoint, these are not that exciting,
-although the `software radio' architecture of the proxmark3 makes it
-easy and fun to support new formats.)
-
-As a bonus, I include some code to use the 13.56 MHz hardware, so you can:
-
-    * do anything that a (medium-range) ISO 15693 reader could
-    * read an ISO 14443 tag, if you know the higher-layer protocol
-    * pretend to be an ISO 14443 tag, if you know the higher-layer protocol
-    * snoop on an ISO 14443 transaction
-
-I am not actively developing any of this. I have other projects that
-seem to be more useful.
-
-USING THE PACKAGE:
-
-The software tools required to build include:
-
-    * cygwin or other unix-like tools for Windows
-    * devkitPro (http://wiki.devkitpro.org/index.php/Getting_Started/devkitARM)
-    * Xilinx's WebPack tools
-    * Modelsim (for test only)
-    * perl
-
-When installing devkitPro, you only need to install the compiler itself. Additional
-support libraries are  not required.
-
-Documentation is minimal, but see the doc/ directory for what exists. A
-previous familiarity with the ARM, with digital signal processing,
-and with embedded programming in general is assumed.
-
-The device is used through a specialized command line interface; for
-example, to clone a Verichip, you might type:
-
-    loread                          ; this reads the tag, and stores the
-                                    ; raw samples in memory on the ARM
-
-    losamples                       ; then we download the samples to
-                                    ; the PC
-
-    vchdemod clone                  ; demodulate the ID, and then put it
-                                    ; back in a format that we can replay
-
-    losim                           ; and then replay it
-
-To read an ISO 15693 tag, you might type:
-
-    hiread                          ; read the tag; this involves sending a
-                                    ; particular command, and then getting
-                                    ; the response (which is stored as raw
-                                    ; samples in memory on the ARM)
-
-    hisamples                       ; then download those samples to the PC
-
-    hi15demod                       ; and demod them to bits (and check the
-                                    ; CRC etc. at the same time)
-
-Notice that in both cases the signal processing mostly happened on the PC
-side; that is of course not practical for a real reader, but it is easier
-to initially write your code and debug on the PC side than on the ARM. As
-long as you use integer math (and I do), it's trivial to port it over
-when you're done.
-
-The USB driver and bootloader are documented (and available separately
-for download, if you wish to use them in another project) at
-
-    http://cq.cx/trivia.pl
+hf mfu ucrdbl - Read Ultralight C Block
+hf mfu ucrdcard - Read Ultralight C Card
+hf mfu ucdump - Dump Ultralight C Card
+hf mfu ucwrbl - Write Ultralight C Block
+hf mfu auth - Attempt to Authenticate to Ultralight C Card
 
 
-OBTAINING HARDWARE:
+Demo...
 
-Most of the ultra-low-volume contract assemblers that have sprung up
-(Screaming Circuits, the various cheap Asian suppliers, etc.) could put
-something like this together with a reasonable yield. A run of around
-a dozen units is probably cost-effective. The BOM includes (possibly-
-outdated) component pricing, and everything is available from Digikey
-and the usual distributors.
+proxmark3> hf mfu ucrdcard
+Attempting to Read Ultralight C...
+#db# READ CARD FINISHED
+isOk:01
+Block 00:04 0e 6b e9
+Block 01:ca 0b 28 80
+Block 02:69 48 00 00
+Block 03:00 00 00 00 [0]
+Block 04:02 00 00 10 [0]
+Block 05:00 06 01 10 [0]
+Block 06:11 ff 00 00 [0]
+Block 07:ff ff ff ff [0]
+...abreviated...
+Block 2b:00 00 00 00 [0]
 
-If you've never assembled a modern circuit board by hand, then this is
-not a good place to start. Some of the components (e.g. the crystals)
-must not be assembled with a soldering iron, and require hot air.
-
-The schematics are included; the component values given are not
-necessarily correct for all situations, but it should be possible to do
-nearly anything you would want with appropriate population options.
-
-The printed circuit board artwork is also available, as Gerbers and an
-Excellon drill file.
-
-
-FUTURE PLANS, ENHANCEMENTS THAT YOU COULD MAKE:
-
-At some point I should write software involving a proper real-time
-operating system for the ARM. I would then provide interrupt-driven
-drivers for many of the peripherals that are polled now (the USB,
-the data stream from the FPGA), which would make it easier to develop
-complex applications.
-
-It would not be all that hard to implement the ISO 15693 reader properly
-(with anticollision, all the commands supported, and so on)--the signal
-processing is already written, so it is all straightforward applications
-work.
-
-I have basic support for ISO 14443 as well: a sniffer, a simulated
-tag, and a reader. It won't do anything useful unless you fill in the
-high-layer protocol.
-
-Nicer (i.e., closer-to-optimal) implementations of all kinds of signal
-processing would be useful as well.
-
-A practical implementation of the learning-the-tag's-ID-from-what-the-
-reader-broadcasts-during-anticollision attacks would be relatively
-straightforward. This would involve some signal processing on the FPGA,
-but not much else after that.
-
-It would be neat to write a driver that could stream samples from the A/Ds
-over USB to the PC, using the full available bandwidth of USB. I am not
-yet sure what that would be good for, but surely something. This would
-require a kernel-mode driver under Windows, though, which is more work.
-
-
-LICENSING:
-
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2 of the License, or
-(at your option) any later version.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-
-
-Jonathan Westhues
-user jwesthues, at host cq.cx
-
-May 2007, Cambridge MA
-
+proxmark3> hf mfu auth
+#db# Auth1 Resp: af1eae15f85b05e32d99b5                 
+#db# AUTH 1 FINISHED                 
+enc(RndB):1e ae 15 f8 5b 05 e3 2d           
+     RndB:13 46 86 a9 4b f7 94 cd           
+     RndA:9b 75 fe 7f 5b 9e ba 79           
+     RA+B:9b 75 fe 7f 5b 9e ba 79 46 86 a9 4b f7 94 cd 13           
+enc(RA+B):62 7a b7 02 0c fe c7 8b a2 4e 6b 43 5e 0f a0 b7           
+#db# len b                 
+#db# Auth2 Resp: 00fcb27f6e3d5db88b8e                 
+#db# AUTH 2 FINISHED                 
+isOk:88 Resonse:00 00 00 00 00 00 00 00           
+proxmark3> hf 14a list
+Recorded Activity          
+          
+Start = Start of Start Bit, End = End of last modulation. Src = Source of Transfer          
+All times are in carrier periods (1/13.56Mhz)          
+          
+     Start |       End | Src | Data          
+-----------|-----------|-----|--------          
+         0 |       992 | Rdr | 52              
+      2404 |      4772 | Tag | 44  00              
+      7040 |      9504 | Rdr | 93  20              
+     10852 |     16740 | Tag | 88  04  0e  6b  e9              
+     18816 |     29280 | Rdr | 93  70  88  04  0e  6b  e9  2c  90              
+     30692 |     34212 | Tag | 04  da  17              
+     35456 |     37920 | Rdr | 95  20              
+     39268 |     45092 | Tag | ca  0b  28  80  69              
+     47232 |     57760 | Rdr | 95  70  ca  0b  28  80  69  69  f1              
+     59108 |     62692 | Tag | 00  fe  51              
+     66176 |     70944 | Rdr | 1a  00  41  76              
+     82660 |     95460 | Tag | af  1e  ae  15  f8  5b  05  e3  2d  99  b5              
+   1031296 |   1053344 | Rdr | af  62  7a  b7  02  0c  fe  c7  8b  a2  4e  6b  43  5e  0f  a0  b7  96  df              
+   1065060 |   1077796 | Tag | 00  fc  b2  7f  6e  3d  5d  b8  8b  8e  cc 
