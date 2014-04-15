@@ -137,7 +137,7 @@ int CmdHF14AMfURdBl(const char *Cmd){
         
     if (strlen(Cmd)<1) {
         PrintAndLog("Usage:  hf mfu urdbl    <block number>");
-        PrintAndLog("        sample: hfu mf urdbl 0");
+        PrintAndLog("        sample: hfu mfu urdbl 0");
         return 0;
     }       
         
@@ -448,7 +448,7 @@ int CmdHF14AMfucAuth(const char *Cmd){
 
     if (strlen(Cmd)<1) {
         PrintAndLog("Usage:  hf mfu auth k <key number>");
-        PrintAndLog("        sample: hf mfu k 0");
+        PrintAndLog("        sample: hf mfu auth k 0");
         return 0;
     } 
     
